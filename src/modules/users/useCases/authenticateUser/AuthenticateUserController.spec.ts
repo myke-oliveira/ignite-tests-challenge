@@ -1,12 +1,11 @@
 import { Connection } from "typeorm";
-
 import  request from "supertest";
+import { v4 as uuidV4 } from "uuid";
 
 import { app } from "../../../../app";
 
-import { createConnection } from "../../../../database";
+import createConnection from "../../../../database";
 import { hash } from "bcryptjs";
-import { v4 as uuidV4 } from "uuid";
 
 let connection: Connection;
 
@@ -30,10 +29,10 @@ describe("Authenticate user controller", () => {
   });
 
   it("should be able to autheticate", async () => {
-    const response = await request(app).post("/").send({
+    const response = await request(app).post("/api/v1/sessions").send({
       email: "admin@finapi.com.br",
-      password: "admin"
-    })
+      password: "admin",
+    });
 
     expect(response.status).toBe(200);
     expect(response.body.user.name).toBe("admin");
