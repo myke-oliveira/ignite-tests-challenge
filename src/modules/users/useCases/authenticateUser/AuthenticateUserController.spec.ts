@@ -15,11 +15,11 @@ describe("Authenticate user controller", () => {
     await connection.runMigrations();
 
     const id = uuidV4();
-    const password = await hash("admin", 8);
+    const password = await hash("auth user password", 8);
 
     await connection.query(
       `INSERT INTO users (id, name, email, password)
-      VALUES('${id}', 'admin', 'admin@finapi.com.br', '${password}')`
+      VALUES('${id}', 'auth user', 'auth.user@finapi.com.br', '${password}')`
     );
   });
 
@@ -28,14 +28,32 @@ describe("Authenticate user controller", () => {
     await connection.close();
   });
 
-  it("should be able to autheticate", async () => {
+  it("should be able to authenticate", async () => {
     const response = await request(app).post("/api/v1/sessions").send({
-      email: "admin@finapi.com.br",
-      password: "admin",
+      email: "auth.user@finapi.com.br",
+      password: "auth user password",
     });
 
     expect(response.status).toBe(200);
-    expect(response.body.user.name).toBe("admin");
-    expect(response.body.user.email).toBe("admin@finapi.com.br");
-  })
+    expect(response.body.user.name).toBe("auth user");
+    expect(response.body.user.email).toBe("auth.user@finapi.com.br");
+  });
+
+  it("should not be able to authenticate user with wrong password", async () => {
+    const response = await request(app).post("/api/v1/sessions").send({
+      email: "authenticatetesteuser@finapi.com.br",
+      password: "wrong",
+    });
+
+    expect(response.status).toBe(401);
+  });
+
+  it("should not be able to authenticate user with wrong email", async () => {
+    const response = await request(app).post("/api/v1/sessions").send({
+      email: "wrong@finapi.com.br",
+      password: "admin",
+    });
+
+    expect(response.status).toBe(401);
+  });
 });
